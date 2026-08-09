@@ -4,34 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Security Dashboard</title>
+    <!-- Pull the official client-side real-time socket layer libraries -->
     <script src="https://pusher.com"></script>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0c0f1d; color: #e2e8f0; margin: 0; padding: 30px; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #0c0f1d; color: #e2e8f0; margin: 0; padding: 30px; }
         .main-container { max-width: 1000px; margin: 0 auto; }
         .dashboard-header { background-color: #1a1f36; padding: 25px; border-radius: 8px; border: 1px solid #2d3748; margin-bottom: 20px; }
         h1 { margin: 0 0 10px 0; font-size: 26px; color: #38bdf8; }
         .status-badge { float: right; background-color: #2b1c1c; color: #f87171; border: 1px solid #ef4444; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .log-panel { background-color: #111424; border: 1px solid #2d3748; padding: 20px; border-radius: 8px; }
-        h2 { font-size: 18px; margin-top: 0; border-bottom: 1px solid #2d3748; padding-bottom: 10px; }
-        .terminal-box { background-color: #05070f; padding: 15px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 14px; color: #a7f3d0; height: 300px; overflow-y: auto; border: 1px solid #1e293b; }
+        .panel { background-color: #111424; border: 1px solid #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        h2 { font-size: 18px; margin-top: 0; border-bottom: 1px solid #2d3748; padding-bottom: 10px; color: #f8fafc; }
+        .terminal-box { background-color: #05070f; padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; color: #a7f3d0; height: 250px; overflow-y: auto; border: 1px solid #1e293b; }
+        .instruction-box { background-color: #05070f; padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 13.5px; color: #38bdf8; border: 1px solid #1e293b; line-height: 1.5; }
         .log-row { margin-bottom: 8px; line-height: 1.4; border-bottom: 1px dashed #1e293b; padding-bottom: 4px; }
         .alert-text { color: #f87171; font-weight: bold; }
+        .cmd-line { color: #facc15; font-weight: bold; }
     </style>
 </head>
 <body>
+
     <div class="main-container">
+        <!-- HEADER MODULE -->
         <header class="dashboard-header">
             <div class="status-badge" id="agent-status">DISCONNECTED FROM ENDPOINT</div>
             <h1>Windows System & Network Security Console</h1>
             <p style="color: #94a3b8; margin: 0; font-size: 14px;">Displays real-time logs streamed directly from the local PowerShell script running on my machine.</p>
         </header>
-        <div class="log-panel">
+
+        <!-- NEW: POWERSHELL RUN INSTRUCTIONS MODULE -->
+        <div class="panel">
+            <h2>Local Agent Execution Commands (Run in PowerShell as Admin)</h2>
+            <div class="instruction-box">
+                <span style="color: #64748b;"># Step 1: Navigate to your desktop project workspace directory folder</span><br>
+                <span class="cmd-line">cd C:\Users\$env:USERNAME\Desktop\Advanced-Windows-EDR-Framework</span><br><br>
+                <span style="color: #64748b;"># Step 2: Clear local terminal runtime restrictions</span><br>
+                <span class="cmd-line">Set-ExecutionPolicy RemoteSigned -Scope Process</span><br><br>
+                <span style="color: #64748b;"># Step 3: Launch the tracking engine agent loop</span><br>
+                <span class="cmd-line">.\audit_script.ps1</span>
+            </div>
+        </div>
+
+        <!-- LOGGING TERMINAL PANEL -->
+        <div class="panel">
             <h2>Live System Security Logs</h2>
             <div class="terminal-box" id="log-display-box">
                 <div class="log-row" style="color: #64748b;">[System] Standing by. Run the local script on your laptop to begin streaming data...</div>
             </div>
         </div>
     </div>
+
     <script>
         const displayBox = document.getElementById('log-display-box');
         const badgeElement = document.getElementById('agent-status');
@@ -41,7 +62,10 @@
             cluster: 'ap2'
         });
 
+        // Open structural real-time socket listeners targeting your streaming route
         const communicationChannel = pusherClient.subscribe('security-channel');
+        
+        // Handle tracking logic whenever data items land on the app endpoint channel
         communicationChannel.bind('security-alert', function(receivedData) {
             badgeElement.innerText = "LOCAL AGENT STREAMING ACTIVE";
             badgeElement.style.backgroundColor = "#142d1f";
