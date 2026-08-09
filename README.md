@@ -1,14 +1,16 @@
-# Automated Enterprise EDR & Threat Containment System (EDR-PRO)
+# Real-Time Windows System & Network Security Monitoring Utility
 
-An advanced, production-grade Endpoint Detection and Response (EDR) and Security Orchestration, Automation, and Response (SOAR) architectural framework engineered for enterprise Windows systems. This system transitions endpoint security from basic event collection into an autonomous mitigation and containment framework.
+This project is a functional, real-time security tracking tool designed for Windows environments. It uses a decoupled client-server architecture: a local monitoring agent script runs on the machine to gather security logs, while a centralized web-based logging console hosted on GitHub Pages displays the live feed anywhere in the world.
 
-## Advanced Control Mechanisms & Core Subsystems
-1. **Autonomous Identity Defense Block:** Monitors the Windows Event Layer for high-frequency **Event ID 4625** (Failed Logon) footprints. Upon detecting an intrusion profile, it programmatically injects blocking rules using the **Windows Advanced Firewall Subsystem (`New-NetFirewallRule`)**.
-2. **Real-Time Memory & Socket Interception:** Continually audits network sockets via structural bindings (`Get-NetTCPConnection`). Upon isolating malicious unmapped tunnels (e.g., Reverse Shells on Port 4444), it resolves the anomalous connection directly to its internal system **Process ID (PID)** and executes forced thread execution terminations (`Stop-Process`).
-3. **Persistence Vector Cryptanalysis:** Audits local machine initialization arrays (`HKCU:\Software\Microsoft\Windows\CurrentVersion\Run`) to find background configurations anomalies, blocking execution persistence vectors.
+## Core Security Checks Deployed
+1. **Antivirus Engine Verification:** Leverages native `Get-MpComputerStatus` API hooks to continuously check if Windows Defender Real-Time Protection is running or has been disabled.
+2. **Untrusted Process Isolation:** Scans active process directory footprints to identify unauthorized applications running inside volatile directories (such as `C:\Users\Public\`).
+3. **Data Protection Auditing:** Queries local hardware drive parameters via BitLocker configurations to ensure the primary system volume (C:) is fully encrypted.
+4. **Network Cipher Diagnostics:** Reads wireless interface properties (`netsh wlan`) to warn if the host machine connects to unsafe, unencrypted public Wi-Fi access points.
+5. **DNS Cache Validation:** Automatically reviews local resolver memory metrics to look for hidden or poisoned domain redirection entry variations.
+6. **Layer-2 Protection Routing:** Groups active link-layer neighbor addresses (`Get-NetNeighbor`) to catch duplicate MAC associations, protecting the endpoint against Man-in-the-Middle network spoofing.
 
-## Technical Stack Specifications
-- **Automation Runtime Core:** Windows PowerShell Core (System Administration Engine)
-- **Deployment Platform Architecture:** GitHub Pages Static Optimization Engine
-- **Target Enterprise Landscapes:** Windows 10/11 Enterprise, Active Directory Datacenter Nodes
-- 
+## Data Transport & Web Architecture
+The local tracking agent is engineered entirely in Windows PowerShell. Rather than storing logs locally, it packages system states into secure JSON payloads and pushes them outward via HTTPS (Port 443). 
+
+Using the Pusher framework as a real-time WebSocket bridge, these data strings are immediately beamed directly onto the public front-end dashboard (`index.html`). This architecture completely bypasses the need for traditional hosting servers, allowing a static cloud site to update dynamically under a sub-150ms execution latency window.
