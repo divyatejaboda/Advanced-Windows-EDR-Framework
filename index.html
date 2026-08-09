@@ -18,7 +18,6 @@
         .sec-tag { background: #131930; border: 1px solid #243160; padding: 6px 14px; border-radius: 6px; font-size: 13px; color: var(--sky-blue); margin-right: 8px; font-family: monospace; display: inline-block; }
         .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .metric-card { background: var(--panel-bg); border: 1px solid var(--border-line); padding: 22px; border-radius: 12px; transition: transform 0.2s; }
-        .metric-card:hover { transform: translateY(-3px); border-color: var(--sky-blue); }
         .metric-card h3 { margin: 0; font-size: 12px; color: var(--gray-text); text-transform: uppercase; letter-spacing: 1px; }
         .metric-card p { margin: 12px 0 0 0; font-size: 28px; font-weight: 700; color: #ffffff; font-family: monospace; }
         .metric-card p.critical { color: var(--neon-red); }
@@ -28,11 +27,12 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--border-line); font-size: 14px; }
         th { color: var(--gray-text); font-weight: 600; background: #080b15; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
-        tr:hover { background: rgba(255,255,255,0.02); }
         .lbl { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; display: inline-block; }
         .lbl-critical { background: rgba(244, 63, 94, 0.15); color: var(--neon-red); border: 1px solid var(--neon-red); }
         .lbl-active { background: rgba(16, 185, 129, 0.15); color: var(--neon-green); border: 1px solid var(--neon-green); }
-        .code-container { background: #03050a; padding: 25px; border-radius: 10px; border: 1px solid var(--border-line); color: #34d399; font-family: 'Courier New', monospace; font-size: 13.5px; overflow-x: auto; line-height: 1.6; }
+        .live-log-container { background: #03050a; padding: 20px; border-radius: 10px; border: 1px solid var(--border-line); font-family: 'Courier New', monospace; font-size: 13px; color: #34d399; height: 150px; overflow-y: auto; }
+        .log-line { margin-bottom: 6px; }
+        .log-alert { color: var(--neon-red); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -55,16 +55,24 @@
                 <p class="success">PROACTIVE</p>
             </div>
             <div class="metric-card">
-                <h3>Response Protocol</h3>
-                <p style="color: var(--sky-blue);">AUTONOMOUS</p>
+                <h3>System Throughput</h3>
+                <p id="live-throughput">98.4%</p>
             </div>
             <div class="metric-card">
                 <h3>Log Audit Target</h3>
                 <p class="critical">EVENT 4625</p>
             </div>
             <div class="metric-card">
-                <h3>Mitigation Latency</h3>
-                <p class="success">&lt; 150ms</p>
+                <h3>Packets Analyzed</h3>
+                <p id="live-packets" style="color: var(--sky-blue);">41,204</p>
+            </div>
+        </div>
+
+        <div class="matrix-panel">
+            <h2>Live Incident Response & Log stream</h2>
+            <div class="live-log-container" id="log-box">
+                <div class="log-line">[SYSTEM] Initializing EDR stream telemetry pipelines...</div>
+                <div class="log-line">[OK] Structural registry baseline match confirmed.</div>
             </div>
         </div>
 
@@ -95,27 +103,54 @@
                         <td>Maps sockets to unique PIDs and triggers automated memory space cleanup via <strong>Stop-Process Core Engine</strong> loops.</td>
                         <td><span class="lbl lbl-active">PROACTIVE PROTECTION</span></td>
                     </tr>
-                    <tr>
-                        <td>Registry Hives (Run)</td>
-                        <td>Malicious Backdoors & Registry Persistence</td>
-                        <td><span class="lbl" style="background: rgba(245,158,11,0.15); color: var(--gold); border: 1px solid var(--gold);">MEDIUM RISK</span></td>
-                        <td>Parses boot authorization configurations against verified clean hashes, tracking unauthorized application startup anomalies.</td>
-                        <td><span class="lbl lbl-active">COMPLIANT AUDIT</span></td>
-                    </tr>
                 </tbody>
             </table>
         </div>
-
-        <div class="matrix-panel">
-            <h2>Production-Grade Engine Implementation</h2>
-            <p style="color: var(--gray-text); font-size: 14px; margin-top: 0;">The code block below outlines the enterprise PowerShell logic used to feed metrics directly to this orchestration console interface:</p>
-            <div class="code-container">
-# Autonomous Firewall Isolation Loop For Identity Attacks
-$FailedLogins = Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625} -MaxEvents 5
-if ($FailedLogins) {
-    New-NetFirewallRule -Name "EDR_Block_Attacker" -DisplayName "EDR Automated Block" -Direction Inbound -Action Block -RemoteAddress "192.168.1.105" -Enabled True
-}</div>
-        </div>
     </div>
+
+    <script>
+        // Real-Time Simulated Dynamic Changes
+        let packetCount = 41204;
+        const logBox = document.getElementById('log-box');
+        const throughputText = document.getElementById('live-throughput');
+        const packetsText = document.getElementById('live-packets');
+
+        const phrases = [
+            "[INFO] Checking network sockets via Get-NetTCPConnection parameter loops...",
+            "[OK] Inbound pipeline metrics nominal. Zero malicious connections discovered.",
+            "[INFO] Scanning Event Viewer log registries for authentication Event ID 4625...",
+            "[SYSTEM CLOUD SYNC] Telemetry state securely pushed to remote server point.",
+            "[ALERT] Failed validation threshold alert simulated on remote IP address loop."
+        ];
+
+        setInterval(() => {
+            // Update simulated metrics
+            packetCount += Math.floor(Math.random() * 15) + 5;
+            packetsText.innerText = packetCount.toLocaleString();
+
+            let fluctuation = (98 + Math.random() * 1.8).toFixed(1);
+            throughputText.innerText = fluctuation + "%";
+
+            // Inject fresh dynamic logs
+            let randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            let timestamp = new Date().toLocaleTimeString();
+            let newLog = document.createElement('div');
+            newLog.className = 'log-line';
+            
+            if(randomPhrase.includes('ALERT')) {
+                newLog.innerHTML = `<span class="log-alert">[${timestamp}] ${randomPhrase}</span>`;
+            } else {
+                newLog.innerText = `[${timestamp}] ${randomPhrase}`;
+            }
+
+            logBox.appendChild(newLog);
+            logBox.scrollTop = logBox.scrollHeight;
+
+            // Keep log window clean
+            if(logBox.children.length > 20) {
+                logBox.removeChild(logBox.firstChild);
+            }
+        }, 3000);
+    </script>
 </body>
 </html>
