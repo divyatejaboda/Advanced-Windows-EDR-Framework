@@ -12,9 +12,9 @@
         .dashboard-header { background-color: #1a1f36; padding: 25px; border-radius: 8px; border: 1px solid #2d3748; margin-bottom: 20px; }
         h1 { margin: 0 0 10px 0; font-size: 26px; color: #38bdf8; }
         .status-badge { float: right; background-color: #2b1c1c; color: #f87171; border: 1px solid #ef4444; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .panel { background-color: #111424; border: 1px solid #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .panel { background-color: #111424; border: 1px solid #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px; transition: all 0.4s ease; }
         h2 { font-size: 18px; margin-top: 0; border-bottom: 1px solid #2d3748; padding-bottom: 10px; color: #f8fafc; }
-        .terminal-box { background-color: #05070f; padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; color: #a7f3d0; height: 250px; overflow-y: auto; border: 1px solid #1e293b; }
+        .terminal-box { background-color: #05070f; padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 14px; color: #a7f3d0; height: 300px; overflow-y: auto; border: 1px solid #1e293b; }
         .instruction-box { background-color: #05070f; padding: 15px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 13.5px; color: #38bdf8; border: 1px solid #1e293b; line-height: 1.5; }
         .log-row { margin-bottom: 8px; line-height: 1.4; border-bottom: 1px dashed #1e293b; padding-bottom: 4px; }
         .alert-text { color: #f87171; font-weight: bold; }
@@ -31,8 +31,8 @@
             <p style="color: #94a3b8; margin: 0; font-size: 14px;">Displays real-time logs streamed directly from the local PowerShell script running on my machine.</p>
         </header>
 
-        <!-- NEW: POWERSHELL RUN INSTRUCTIONS MODULE -->
-        <div class="panel">
+        <!-- AUTOMATICALLY HIDING POWERSHELL RUN INSTRUCTIONS MODULE -->
+        <div class="panel" id="instructions-panel">
             <h2>Local Agent Execution Commands (Run in PowerShell as Admin)</h2>
             <div class="instruction-box">
                 <span style="color: #64748b;"># Step 1: Navigate to your desktop project workspace directory folder</span><br>
@@ -56,6 +56,7 @@
     <script>
         const displayBox = document.getElementById('log-display-box');
         const badgeElement = document.getElementById('agent-status');
+        const instructionsPanel = document.getElementById('instructions-panel');
 
         // Initialized directly with your permanent live Pusher Application API key
         const pusherClient = new Pusher('e8cfa5d6f449e6e3f793', {
@@ -67,11 +68,16 @@
         
         // Handle tracking logic whenever data items land on the app endpoint channel
         communicationChannel.bind('security-alert', function(receivedData) {
+            // 1. Update status badge visual elements
             badgeElement.innerText = "LOCAL AGENT STREAMING ACTIVE";
             badgeElement.style.backgroundColor = "#142d1f";
             badgeElement.style.color = "#4ade80";
             badgeElement.style.borderColor = "#22c55e";
 
+            // 2. NEW: Automatically hide the instructions panel when the system connects
+            instructionsPanel.style.display = "none";
+
+            // 3. Append and handle incoming log data structures
             let currentTimestamp = new Date().toLocaleTimeString();
             let newRow = document.createElement('div');
             newRow.className = 'log-row';
