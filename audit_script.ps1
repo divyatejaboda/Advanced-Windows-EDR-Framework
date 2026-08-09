@@ -4,7 +4,7 @@
 Clear-Host
 $ErrorActionPreference = "SilentlyContinue"
 
-# Put your unique Pusher API credentials here
+# Your Live Pusher API Credentials Deployed Successfully
 $AppId  = "2184615"
 $Key    = "e8cfa5d6f449e6e3f793"
 $Secret = "6474c13cf362d0f41064"
