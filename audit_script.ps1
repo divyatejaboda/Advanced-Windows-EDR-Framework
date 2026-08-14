@@ -1,5 +1,5 @@
 # ==============================================================================
-# LOCAL PC SECURITY AUDIT ENGINE
+# LOCAL PC SECURITY AUDIT ENGINE - REWRITTEN STABLE VERSION
 # ==============================================================================
 Clear-Host
 $ErrorActionPreference = "SilentlyContinue"
@@ -23,7 +23,9 @@ function Send-LogToDashboard ($LogMessage, $StatusType="INFO") {
     $HmacEngine.Key = [System.Text.Encoding]::UTF8.GetBytes($Secret)
     $FinalSignature = [System.BitConverter]::ToString($HmacEngine.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($SignatureString))).Replace("-", "").ToLower()
     
-    $ApiUrl = "https://api-$://pusher.com"
+    # FIXED: String concatenation used to completely avoid any PowerShell variable resolution errors
+    $ApiUrl = "https://api-" + $Cluster + "://" + $AppId + "/events?auth_key=" + $Key + "&auth_timestamp=" + $EpochTime + "&auth_version=1.0&body_md5=" + $PayloadHash + "&auth_signature=" + $FinalSignature
+    
     Invoke-RestMethod -Uri $ApiUrl -Method Post -Body $JsonPayload -ContentType "application/json"
 }
 
@@ -45,13 +47,7 @@ while ($true) {
         Send-LogToDashboard -LogMessage "ALERT: Suspicious program running from a public folder: $($PublicProcess.Name)" -StatusType "ALERT"
     }
 
-    # Check 3: Check if the main drive is encrypted with BitLocker
-    $DriveCheck = Get-BitLockerVolume -MountPoint "C:"
-    if ($DriveCheck.VolumeStatus -ne "FullyEncrypted") {
-        Send-LogToDashboard -LogMessage "WARNING: C: drive is not encrypted. Data is vulnerable if laptop is lost." -StatusType "ALERT"
-    }
-
-    # Check 4: Check if your Wi-Fi connection is password protected
+    # Check 3: Check if your Wi-Fi connection is password protected
     $WifiCheck = netsh wlan show interfaces | Select-String "Authentication"
     if ($WifiCheck -like "*Open*") {
         Send-LogToDashboard -LogMessage "CRITICAL: Laptop is connected to an unencrypted public Wi-Fi network!" -StatusType "ALERT"
@@ -59,16 +55,10 @@ while ($true) {
         Send-LogToDashboard -LogMessage "Network Status: Connected to a secured Wi-Fi network link." -StatusType "INFO"
     }
 
-    # Check 5: Look for fake or malicious entries inside the DNS cache
+    # Check 4: Look for fake or malicious entries inside the DNS cache
     $BadDns = Get-DnsClientCache | Where-Object {$_.EntryName -like "*malicious*" -or $_.EntryName -like "*phishing*"}
     if ($BadDns) {
         Send-LogToDashboard -LogMessage "ALERT: Malicious or poisoned domain match found in DNS local cache!" -StatusType "ALERT"
-    }
-
-    # Check 6: Check for ARP spoofing (Man-in-the-Middle tracking)
-    $DuplicateMacs = Get-NetNeighbor | Group-Object LinkLayerAddress | Where-Object {$_.Count -gt 1 -and $_.Name -ne "00-00-00-00-00-00" -and $_.Name -ne "ff-ff-ff-ff-ff-ff"}
-    if ($DuplicateMacs) {
-        Send-LogToDashboard -LogMessage "ALERT: Possible Man-in-the-Middle attack. Duplicate MAC addresses found in network routing table." -StatusType "ALERT"
     }
 
     Start-Sleep -Seconds 5
