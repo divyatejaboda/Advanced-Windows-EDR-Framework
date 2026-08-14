@@ -1,13 +1,13 @@
 # ==============================================================================
-# ENTERPRISE COMPLIANT ENDPOINT DETECTION - STABLE PARSER MODEL
+# ENTERPRISE COMPLIANT ENDPOINT DETECTION - ABSOLUTE FIXED MODEL
 # ==============================================================================
 Clear-Host
 $ErrorActionPreference = 'Stop'
 
-# Force Telemetry Encryption Protocols
+# Force Standard Internet Telemetry Encryption Cores
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
 
-# Production Credentials Array
+# Live Pusher API Credentials Array
 $AppId   = '2184615'
 $Key     = 'e8cfa5d6f449e6e3f793'
 $Secret  = '6474c13cf362d0f41064'
@@ -35,15 +35,17 @@ function Send-TelemetryLog ($Message, $StatusType='INFO', $RiskLevel='LOW', $Rem
         $BodyBytes = [System.Text.Encoding]::UTF8.GetBytes($PostData)
         $BodyHash = [System.BitConverter]::ToString($Md5.ComputeHash($BodyBytes)).Replace('-', '').ToLower()
 
-        $AuthQuery = "auth_key=$Key&auth_timestamp=$EpochTime&auth_version=1.0&body_md5=$BodyHash"
-        $StringToSign = "POST`n/apps/$AppId/events`n$AuthQuery"
+        # FIXED: Built using raw addition to completely eliminate any string variable substitution bugs
+        $AuthQuery = 'auth_key=' + $Key + '&auth_timestamp=' + $EpochTime + '&auth_version=1.0&body_md5=' + $BodyHash
+        $StringToSign = 'POST' + "`n" + '/apps/' + $AppId + '/events' + "`n" + $AuthQuery
 
         $Hmac = New-Object System.Security.Cryptography.HMACSHA256
         $Hmac.Key = [System.Text.Encoding]::UTF8.GetBytes($Secret)
         $SignatureBytes = $Hmac.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($StringToSign))
         $Signature = [System.BitConverter]::ToString($SignatureBytes).Replace('-', '').ToLower()
 
-        $TargetUri = "https://api-$://pusher.com"
+        # FIXED: Complete removal of internal inline variable substitution characters
+        $TargetUri = 'https://api-' + $Cluster + '://' + $AppId + '/events?' + $AuthQuery + '&auth_signature=' + $Signature
 
         $null = Invoke-RestMethod -Uri $TargetUri -Method Post -Body $PostData -ContentType 'application/json' -TimeoutSec 5
         Write-Host '[STREAM ACTIVE] Telemetry data frame securely transmitted.' -ForegroundColor Green
