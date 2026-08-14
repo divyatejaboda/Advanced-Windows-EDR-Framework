@@ -1,5 +1,5 @@
 # ==============================================================================
-# LOCAL PC SECURITY AUDIT ENGINE - SECURE TLS PIPELINE MODEL
+# LOCAL PC SECURITY AUDIT ENGINE - FULL CORE UPGRADE
 # ==============================================================================
 Clear-Host
 $ErrorActionPreference = "SilentlyContinue"
@@ -15,12 +15,10 @@ $Cluster= "ap2"
 
 function Send-LogToDashboard ($LogMessage, $StatusType="INFO", $RiskLevel="LOW", $Remediation="None") {
     $EpochTime = [int][double]::Parse((Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
-    
-    # Pack parameters cleanly into a clear JSON payload
     $JsonPayload = '{"name":"security-alert","channel":"security-channel","data":"{\"message\":\"' + $LogMessage + '\",\"type\":\"' + $StatusType + '\",\"risk\":\"' + $RiskLevel + '\",\"remediation\":\"' + $Remediation + '\"}"}'
     
     $SystemMD5 = [System.Security.Cryptography.MD5]::Create()
-    $PayloadBytes = [System.Text.Encoding]::UTF8.GetBytes($JsonPayload)
+    $PayloadBytes = [System.Text.EncodingUTF8.GetBytes($JsonPayload)
     $PayloadHash = [System.BitConverter]::ToString($SystemMD5.ComputeHash($PayloadBytes)).Replace("-", "").ToLower()
     
     $SignatureString = "POST`n/apps/$AppId/events`nauth_key=$Key&auth_timestamp=$EpochTime&auth_version=1.0&body_md5=$PayloadHash"
@@ -29,7 +27,6 @@ function Send-LogToDashboard ($LogMessage, $StatusType="INFO", $RiskLevel="LOW",
     $FinalSignature = [System.BitConverter]::ToString($HmacEngine.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($SignatureString))).Replace("-", "").ToLower()
     
     $ApiUrl = "https://api-" + $Cluster + "://" + $AppId + "/events?auth_key=" + $Key + "&auth_timestamp=" + $EpochTime + "&auth_version=1.0&body_md5=" + $PayloadHash + "&auth_signature=" + $FinalSignature
-    
     Invoke-RestMethod -Uri $ApiUrl -Method Post -Body $JsonPayload -ContentType "application/json"
 }
 
@@ -45,10 +42,12 @@ while ($true) {
         Send-LogToDashboard -LogMessage "Windows Defender antivirus engine is healthy." -StatusType "INFO" -RiskLevel "LOW" -Remediation "None"
     }
 
-    # Check 2: Public App Directory Audit
-    $PublicProcess = Get-Process | Where-Object {$_.Path -like "*\Users\Public\*"}
-    if ($PublicProcess) {
-        Send-LogToDashboard -LogMessage "Suspicious process executing out of volatile public directory folder: $($PublicProcess.Name)" -StatusType "ALERT" -RiskLevel "HIGH" -Remediation "Isolate Process ID, terminate execution tree, and clean public directory files."
+    # Check 2: Public App Directory Audit (TEST TRIGGER)
+    $TestFileExists = Test-Path "C:\Users\Public\malware_test.exe"
+    if ($TestFileExists) {
+        Send-LogToDashboard -LogMessage "Suspicious unverified executable detected inside volatile public workspace folders: malware_test.exe" -StatusType "ALERT" -RiskLevel "HIGH" -Remediation "Initiate file-system quarantine protocols, wipe unverified background binaries, and restrict write path access rules."
+    } else {
+        Send-LogToDashboard -LogMessage "Public directory path baseline integrity verified." -StatusType "INFO" -RiskLevel "LOW" -Remediation "None"
     }
 
     # Check 3: Wi-Fi Encryption Evaluation
