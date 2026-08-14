@@ -3,46 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Security Dashboard</title>
+    <title>Enterprise Security Center - Command Terminal</title>
     <script src="https://pusher.com"></script>
     <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0c0f1d; color: #e2e8f0; margin: 0; padding: 30px; }
-        .main-container { max-width: 1100px; margin: 0 auto; }
-        .dashboard-header { background-color: #1a1f36; padding: 25px; border-radius: 8px; border: 1px solid #2d3748; margin-bottom: 20px; }
-        h1 { margin: 0; font-size: 26px; color: #38bdf8; }
-        .status-badge { float: right; background-color: #2b1c1c; color: #f87171; border: 1px solid #ef4444; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .panel { background-color: #111424; border: 1px solid #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        h2 { font-size: 18px; margin-top: 0; border-bottom: 1px solid #2d3748; padding-bottom: 10px; color: #f8fafc; }
+        :root { --bg-dark: #070a13; --card-bg: #0f1424; --border: #1e294b; --sky-blue: #38bdf8; --neon-red: #f43f5e; --neon-green: #10b981; --text-muted: #64748b; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-dark); color: #f8fafc; margin: 0; padding: 40px 20px; }
+        .dashboard-container { max-width: 1200px; margin: 0 auto; }
+        .siem-header { background: linear-gradient(135deg, #0f1424 0%, #090d1a 100%); padding: 30px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin-bottom: 25px; position: relative; }
+        .siem-header::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--sky-blue); }
+        h1 { margin: 0 0 8px 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; color: #ffffff; }
+        .status-badge { float: right; display: inline-flex; align-items: center; gap: 8px; background: rgba(244, 63, 94, 0.1); border: 1px solid var(--neon-red); color: var(--neon-red); padding: 6px 14px; border-radius: 30px; font-size: 12px; font-weight: 600; text-transform: uppercase; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .panel { background-color: var(--card-bg); border: 1px solid var(--border); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 25px; transition: all 0.3s ease; }
+        h2 { font-size: 18px; margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 12px; color: #ffffff; font-weight: 600; }
+        .instruction-box { background-color: #03050a; padding: 18px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 13.5px; color: var(--sky-blue); border: 1px solid var(--border); line-height: 1.6; }
+        .cmd-line { color: #facc15; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #2d3748; font-size: 13px; }
-        th { background-color: #05070f; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 11px; }
-        .risk-badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .risk-low { background-color: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid #22c55e; }
-        .risk-critical { background-color: rgba(244, 63, 94, 0.15); color: #f87171; border: 1px solid #ef4444; }
+        th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+        th { background-color: #04060c; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .risk-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; display: inline-block; }
+        .risk-LOW { background-color: rgba(16, 185, 129, 0.15); color: var(--neon-green); border: 1px solid var(--neon-green); }
+        .risk-CRITICAL { background-color: rgba(244, 63, 94, 0.15); color: var(--neon-red); border: 1px solid var(--neon-red); animation: shake 0.5s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <header class="dashboard-header">
+    <div class="dashboard-container">
+        <!-- HEADER BLOCK -->
+        <header class="siem-header">
             <div class="status-badge" id="agent-status">DISCONNECTED FROM ENDPOINT</div>
-            <h1>Windows System & Network Security Console</h1>
-            <p style="color: #94a3b8; margin: 0; font-size: 14px;">Displays real-time logs streamed directly from the local PowerShell script running on my machine.</p>
+            <h1>Automated Enterprise EDR & Incident Response Center</h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 14.5px;">Processing asynchronous real-time host architecture variables over persistent secure WebSockets frameworks.</p>
         </header>
 
+        <!-- AUTOMATICALLY HIDING EXECUTION CONFIGURATION PANEL -->
+        <div class="panel" id="instructions-panel">
+            <h2>Local Script Execution Guide (Run in Administrator PowerShell)</h2>
+            <div class="instruction-box">
+                <span style="color: #475569;"># 1. Route terminal pointer workspace inside your localized desktop directory repository</span><br>
+                <span class="cmd-line">cd C:\Users\Temp\Desktop\Advanced-Windows-EDR-Framework</span><br><br>
+                <span style="color: #475569;"># 2. Reset computer runtime script processing execution restrictions</span><br>
+                <span class="cmd-line">Set-ExecutionPolicy RemoteSigned -Scope Process -Force</span><br><br>
+                <span style="color: #475569;"># 3. Fire up the proactive threat extraction telemetry agent daemon loop</span><br>
+                <span class="cmd-line">.\audit_script.ps1</span>
+            </div>
+        </div>
+
+        <!-- TELEMETRY INCIDENT INCIDENT CONTROL MATRIX GRID -->
         <div class="panel">
-            <h2>Live Threat Assessment & Incident Response Matrix</h2>
+            <h2>Live Threat Assessment & Adaptive Mitigation Matrix</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Timestamp</th>
-                        <th>Security Audit Check Description</th>
-                        <th>Risk Severity</th>
-                        <th>Automated Action / Suggested Remediation</th>
+                        <th style="width: 12%;">Timestamp</th>
+                        <th style="width: 43%;">Security Audit Monitoring Event Description</th>
+                        <th style="width: 12%;">Risk Severity</th>
+                        <th style="width: 33%;">Autonomous Action / Playbook Remediation Rules</th>
                     </tr>
                 </thead>
                 <tbody id="matrix-body">
-                    <tr id="empty-row"><td colspan="4" style="color: #64748b; text-align: center; padding: 30px;">Standing by. Launch local agent loop to stream structural data structures...</td></tr>
+                    <tr id="empty-row"><td colspan="4" style="color: var(--text-muted); text-align: center; padding: 40px; font-style: italic;">Standing by. Launch localized daemon script layers to bind telemetry socket communication lines...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -52,30 +72,39 @@
         const matrixBody = document.getElementById('matrix-body');
         const emptyRow = document.getElementById('empty-row');
         const badgeElement = document.getElementById('agent-status');
+        const instructionsPanel = document.getElementById('instructions-panel');
 
-        // Initialize Pusher Client
-        const pusher = new Pusher('e8cfa5d6f449e6e3f793', { cluster: 'ap2' });
+        // Setup persistent WebSocket channel connections targeting cluster allocations
+        const pusher = new Pusher('e8cfa5d6f449e6e3f793', { cluster: 'ap2', forceTLS: true });
         const channel = pusher.subscribe('security-channel');
         
-        // Listen to the direct 'security-alert' event name
-        channel.bind('security-alert', function(data) {
-            // Update connection badge state immediately
+        // Listen to authenticated API event streams
+        channel.bind('security-alert', function(rawPayload) {
+            // Unpack strings to object layers safely
+            let data = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
+            
+            // Reconfigure header badge configurations on initial handshake frame arrival
             badgeElement.innerText = "LOCAL AGENT STREAMING ACTIVE";
-            badgeElement.style.backgroundColor = "#142d1f"; badgeElement.style.color = "#4ade80"; badgeElement.style.borderColor = "#22c55e";
-            if(emptyRow) { emptyRow.style.display = "none"; }
+            badgeElement.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
+            badgeElement.style.color = "var(--neon-green)";
+            badgeElement.style.borderColor = "var(--neon-green)";
+            
+            // Hide installation setup help panel layout gracefully
+            instructionsPanel.style.display = "none";
+            if (emptyRow) { emptyRow.style.display = "none"; }
 
-            let currentTimestamp = new Date().toLocaleTimeString();
+            // Extract chronological timestamps matching real execution hours
+            let timestamp = new Date().toLocaleTimeString();
             let newRow = document.createElement('tr');
             
-            let riskClass = "risk-low";
-            if(data.risk === "CRITICAL") riskClass = "risk-critical";
-
             newRow.innerHTML = `
-                <td style="font-family: monospace; color: #38bdf8;">${currentTimestamp}</td>
+                <td style="font-family: monospace; color: var(--sky-blue); font-weight: 600;">${timestamp}</td>
                 <td><strong>${data.message}</strong></td>
-                <td><span class="risk-badge ${riskClass}">${data.risk}</span></td>
-                <td style="color: #94a3b8;">${data.remediation}</td>
+                <td><span class="risk-badge risk-${data.risk}">${data.risk}</span></td>
+                <td style="color: #94a3b8; font-size: 13px;">${data.reremediation || data.remediation}</td>
             `;
+
+            // Append newest diagnostic rows natively to the top of our layout tracking dashboard grid
             matrixBody.insertBefore(newRow, matrixBody.firstChild);
         });
     </script>
