@@ -9,7 +9,7 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #0c0f1d; color: #e2e8f0; margin: 0; padding: 30px; }
         .main-container { max-width: 1100px; margin: 0 auto; }
         .dashboard-header { background-color: #1a1f36; padding: 25px; border-radius: 8px; border: 1px solid #2d3748; margin-bottom: 20px; }
-        h1 { margin: 0 0 10px 0; font-size: 26px; color: #38bdf8; }
+        h1 { margin: 0; font-size: 26px; color: #38bdf8; }
         .status-badge { float: right; background-color: #2b1c1c; color: #f87171; border: 1px solid #ef4444; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .panel { background-color: #111424; border: 1px solid #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
         h2 { font-size: 18px; margin-top: 0; border-bottom: 1px solid #2d3748; padding-bottom: 10px; color: #f8fafc; }
@@ -53,37 +53,30 @@
         const emptyRow = document.getElementById('empty-row');
         const badgeElement = document.getElementById('agent-status');
 
-        // Connect directly to the Pusher cloud logging stream infrastructure
+        // Initialize Pusher Client
         const pusher = new Pusher('e8cfa5d6f449e6e3f793', { cluster: 'ap2' });
+        const channel = pusher.subscribe('security-channel');
         
-        // Catch raw socket frame objects streaming over fallback pipelines
-        pusher.connection.bind('message', function(payload) {
-            // Update structural status UI parameters immediately
+        // Listen to the direct 'security-alert' event name
+        channel.bind('security-alert', function(data) {
+            // Update connection badge state immediately
             badgeElement.innerText = "LOCAL AGENT STREAMING ACTIVE";
             badgeElement.style.backgroundColor = "#142d1f"; badgeElement.style.color = "#4ade80"; badgeElement.style.borderColor = "#22c55e";
             if(emptyRow) { emptyRow.style.display = "none"; }
 
             let currentTimestamp = new Date().toLocaleTimeString();
+            let newRow = document.createElement('tr');
             
-            // Build dynamic row configurations for Check 1 (Antivirus Baseline)
-            let row1 = document.createElement('tr');
-            row1.innerHTML = `
-                <td style="font-family: monospace; color: #38bdf8;">${currentTimestamp}</td>
-                <td><strong>Windows Defender antivirus engine running healthy baseline scans.</strong></td>
-                <td><span class="risk-badge risk-low">LOW</span></td>
-                <td style="color: #94a3b8;">None required. Environment secure.</td>
-            `;
-            matrixBody.insertBefore(row1, matrixBody.firstChild);
+            let riskClass = "risk-low";
+            if(data.risk === "CRITICAL") riskClass = "risk-critical";
 
-            // Build dynamic row configurations for Check 2 (Network Encryption Protocol Baseline)
-            let row2 = document.createElement('tr');
-            row2.innerHTML = `
+            newRow.innerHTML = `
                 <td style="font-family: monospace; color: #38bdf8;">${currentTimestamp}</td>
-                <td><strong>Connected to a verified password-protected wireless interface.</strong></td>
-                <td><span class="risk-badge risk-low">LOW</span></td>
-                <td style="color: #94a3b8;">None required. Connection link encrypted.</td>
+                <td><strong>${data.message}</strong></td>
+                <td><span class="risk-badge ${riskClass}">${data.risk}</span></td>
+                <td style="color: #94a3b8;">${data.remediation}</td>
             `;
-            matrixBody.insertBefore(row2, matrixBody.firstChild);
+            matrixBody.insertBefore(newRow, matrixBody.firstChild);
         });
     </script>
 </body>
